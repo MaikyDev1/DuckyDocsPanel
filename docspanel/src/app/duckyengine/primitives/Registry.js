@@ -6,7 +6,10 @@ context.keys().forEach((key) => {
   const mod = context(key).default
 
   mod.element_name.forEach((name) => {
-    registry[name] = mod.element
+    registry[name] = {
+      element: mod.element,
+      editor_element: mod.in_editor
+    }
   })
 })
 
