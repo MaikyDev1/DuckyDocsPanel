@@ -9,6 +9,8 @@ export function Renderer(props) {
 }
 
 export function EditorRenderer(props) {
+  if (registry[props.element] === undefined) return null;
+
   const Component = registry[props.element].editor_element
 
   if (!Component) return null
