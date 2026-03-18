@@ -10,7 +10,7 @@ function BasePopup({children, closeFunction}) {
   )
 }
 
-export function NewElementPopup({closeFunction}) {
+export function NewElementPopup({addElementFunction, parentID, closeFunction}) {
   return (
     <BasePopup closeFunction={closeFunction}>
       <p>Add a new element</p>
@@ -18,14 +18,14 @@ export function NewElementPopup({closeFunction}) {
         {/* BASIC ELEMENTS */}
         <p className="text-sm border-b border-b-stone-600 text-center">Basic Elements</p>
         <StoneButton title="Title"/>
-        <StoneButton title="Paragraph"/>
+        <StoneButton title="Paragraph" onClick={() => addElementFunction(parentID, "p")}/>
         <div className="flex w-full gap-2">
-          <StoneButton title="Divider"/>
-          <StoneButton title="Brake"/>
+          <StoneButton title="Divider" onClick={() => addElementFunction(parentID, "divider")}/>
+          <StoneButton title="Brake" onClick={() => addElementFunction(parentID, "brake")}/>
         </div>
         {/* Advanced ELEMENTS */}
         <p className="text-sm border-b border-b-stone-600 text-center">Advanced Elements</p>
-        <StoneButton title="Code"/>
+        <StoneButton title="Code" onClick={() => addElementFunction(parentID, "code")}/>
         <StoneButton title="Expandable"/>
         <StoneButton title="Table"/>
         <StoneButton title="Tabs"/>

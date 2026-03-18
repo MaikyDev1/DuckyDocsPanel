@@ -1,6 +1,6 @@
 'use client'
 
-import {EditorRenderer} from "@/app/duckyengine/Renderer";
+import {EditorRenderer, getDefaults} from "@/app/duckyengine/Renderer";
 import {DashboardIcon, DefaultUserIcon, TempLogo} from "@/app/icons";
 import {useState} from "react";
 import { Icon } from '@iconify-icon/react';
@@ -21,25 +21,42 @@ const page_json = {
   elements: [
     {element: "title", size: "h2", text: "Welcome to the power of ducks", id: 1},
     {element: "divider", id: 2},
+    {element: "expand", id: 4, title: "test", content: [{element: "p", size: "h2", text: "Welcome to the power of ducks", id: 5}, {element: "p", size: "h2", text: "Welcome to the power of ducks", id: 6}, {element: "p", size: "h2", text: "Welcome to the power of ducks", id: 7}]},
     {element: "p", id: 3, text: "In here you can add elements, change them, or preview them outside of the editor. Preview can be your url or you can use our urls for free!"},
   ]
 }
 
+
 export default function Page() {
   const [page, setPage] = useState(page_json);
   const [newElement, setNewElement] = useState(false);
-  function addNewElement(element) {
+  const removeElement = (id) => {
+    setPage(prev => ({
+      ...prev,
+      elements: removeRecursive(prev.elements, id)
+    }))
+  }
 
+  const addNewElement = (parentId, type) => {
+
+    const element = {
+      element: type,
+      id: Date.now()
+    }
+    setPage(prev => ({
+      ...prev,
+      elements: addRecursive(prev.elements, parentId, element)
+    }))
   }
   return (
     <main className="h-screen w-screen grid grid-cols-7 bg-stone-800">
-      {newElement ? <NewElementPopup closeFunction={() => setNewElement(false)}/> : null}
+      {newElement ? <NewElementPopup addElementFunction={addElementFunction} closeFunction={() => setNewElement(false)}/> : null}
       <SideBar/>
       <section className="h-full bg-stone-800 col-span-6">
         <TopBar meta={page.meta}/>
-        <div className="px-10 py-2 overflow-auto">
+        <div className="px-10 py-2 overflow-auto max-h-[90%]">
           {page.elements.map(e =>
-            <EditorRenderer key={e.id} {...e}/>
+            <EditorRenderer key={e.id} addNewElement={addNewElement} {...e}/>
           )}
           <div onClick={() => setNewElement(true)} className={`p-2 mt-5 cursor-pointer select-none flex items-center gap-2 bg-stone-800 text-stone-300 border-t border-stone-600 ring ring-stone-950 drop-shadow-2xl rounded-xl`}>
             <p className="font-medium text-md">+ New Element</p>
@@ -97,85 +114,33 @@ function TopBar({meta}) {
     </nav>
   )
 }
+const removeRecursive = (elements, id) => {
+  return elements
+    .filter(el => el.id !== id)
+    .map(el => ({
+      ...el,
+      content: el.content
+        ? removeRecursive(el.content, id)
+        : undefined
+    }))
+}
 
-// export default function Home() {
-//   const [content, setContent] = useState([
-//     {id: 0, type: "p", text: "Hello guys!"},
-//     {id: 1, type: "code", text: "public void main () {\n  int a = 't'; \n}"},
-//     {id: 2, type: "expandable", content: [
-//         {id: 3, type: "p", text: "Hello guys!"},
-//         {id: 3, type: "p", text: "I am in a n expandable!"}
-//       ]},
-//   ]);
-//
-//   const handleKeys = (e) => {
-//     const id = document.activeElement.id;
-//     switch (e.key) {
-//       case "Enter": {
-//         e.preventDefault();
-//         const newId = newElementAfter(id, {type: "p", text: ""});
-//         document.getElementById(newId.toString()).focus();
-//         break;
-//       }
-//       case "ArrowDown": {
-//         e.preventDefault();
-//         const index = getNextElement(id).id;
-//         document.getElementById(index).focus();
-//         break;
-//       }
-//       case "ArrowUp": {
-//         e.preventDefault();
-//         const index = getNextElement(id).id;
-//         document.getElementById(index).focus();
-//         break;
-//       }
-//     }
-//   };
-//
-//   const updateText = (id, newText) => {
-//     setContent(prev =>
-//       prev.map(item =>
-//         item.id === id ? { ...item, text: newText } : item
-//       )
-//     );
-//   };
-//
-//   const getIndexById = (id) => {
-//     return content.findIndex(item => item.id === id);
-//   };
-//
-//   const newElementAfter = (afterId, element) => {
-//     const newElement = {
-//       id: Date.now(),
-//       ...element
-//     }
-//     setContent(prev => {
-//       const updated = [...prev];
-//       updated.splice(getIndexById(afterId) + 1, 0, newElement);
-//       return updated;
-//     });
-//     return newElement.id
-//   }
-//   const getNextElement = (id) => {
-//     return content[content.findIndex(item => item.id === id) + 1];
-//   }
-//   return (
-//     <div className="bg-stone-900 h-screen w-screen p-3">
-//       <div className="p-2 bg-stone-600 flex gap-1">
-//         <p>DuckyDocs </p>
-//         <p>| Untilted</p>
-//         <div onClick={() => alert(JSON.stringify(content))}>Show code</div>
-//       </div>
-//       <main className="p-2 flex flex-col">
-//         <section className="flex flex-col ml-25">
-//           {content.map(element =>
-//             <div key={element.id}>
-//               <EditorRenderer getNextElement={getNextElement} addElementAfter={newElementAfter} updateTextFunction={updateText} element={element.type} text={element.text} id={element.id}/>
-//             </div>
-//           )}
-//         </section>
-//         <div className="mt-5 rounded-xl p-2 bg-stone-500" >Add new element</div>
-//       </main>
-//     </div>
-//   );
-// }
+const addRecursive = (elements, parentId, newElement) => {
+  return elements.map(el => {
+    if (el.id === parentId) {
+      return {
+        ...el,
+        content: [...(el.content || []), newElement]
+      }
+    }
+
+    if (el.content) {
+      return {
+        ...el,
+        content: addRecursive(el.content, parentId, newElement)
+      }
+    }
+
+    return el
+  })
+}

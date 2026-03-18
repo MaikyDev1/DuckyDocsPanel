@@ -12,9 +12,9 @@ export function Divider({id}) {
 export function InEditor({id}) {
   return (
     <div className="flex gap-2">
-      <DeleteIcon className=""/>
-      <EditIcon className=""/>
-      <div className="w-full border-t border-t-stone-600 h-0 mt-2"/>
+      <DeleteIcon className="absolute -translate-x-11"/>
+      <EditIcon className="absolute -translate-x-6"/>
+      <div className="w-full border-t border-t-stone-600 h-0 my-2"/>
     </div>
   )
 }

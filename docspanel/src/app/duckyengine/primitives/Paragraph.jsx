@@ -11,9 +11,9 @@ export function Paragraph({id, text}) {
 
 export function InEditor({id, text}) {
   return (
-    <div className="flex gap-2">
-      <DeleteIcon className=""/>
-      <EditIcon className=""/>
+    <div className="flex gap-2 relative">
+      <DeleteIcon className="absolute -translate-x-11"/>
+      <EditIcon className="absolute -translate-x-6"/>
       <EditableText id={id} text={text}/>
     </div>
   )
@@ -22,6 +22,7 @@ export function InEditor({id, text}) {
 const paragraphModule = {
   element: Paragraph,
   element_name: ["p"],
+  default_config: {element: "p", text: "Click to edit!"},
   in_editor: InEditor
 }
 
