@@ -9,12 +9,13 @@ export function Paragraph({id, text}) {
   )
 }
 
-export function InEditor({id, text}) {
+export function InEditor({id, text, functions}) {
   return (
     <div className="flex gap-2 relative">
-      <DeleteIcon className="absolute -translate-x-11"/>
-      <EditIcon className="absolute -translate-x-6"/>
-      <EditableText id={id} text={text}/>
+      <div className="absolute cursor-pointer flex text-lg -translate-x-12">
+        <DeleteIcon className="" onClick={() => functions.removeElement(id)}/>
+      </div>
+      <EditableText id={id} text={text} updateFunction={functions ? functions.updateElement : null}/>
     </div>
   )
 }
@@ -22,7 +23,6 @@ export function InEditor({id, text}) {
 const paragraphModule = {
   element: Paragraph,
   element_name: ["p"],
-  default_config: {element: "p", text: "Click to edit!"},
   in_editor: InEditor
 }
 

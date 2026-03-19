@@ -1,36 +1,45 @@
-import {GrayButton, StoneButton} from "@/app/FlareUI/Basic/Buttons";
+import {BlackButton, GrayButton, StoneButton} from "@/app/FlareUI/Basic/Buttons";
+import {useState} from "react";
+import {InputTypeBox} from "@/app/FlareUI/Basic/InteractiveFields";
 
 function BasePopup({children, closeFunction}) {
   return (
-    <div onClick={closeFunction} className="bg-white/10 backdrop-blur-[2px] z-100 absolute top-0 left-0 flex justify-center items-center w-screen h-screen">
-      <div className="p-2 flex items-center justify-between flex-col py-5 rounded-2xl shadow-2xl w-1/4 bg-stone-900 min-h-1/4" onClick={(e) => e.stopPropagation()}>
+    <div onClick={closeFunction} className="bg-white/10 backdrop-blur-[2px] z-100 fixed top-0 left-0 flex justify-center items-center w-screen h-screen">
+      <div className="p-2 flex items-center justify-between flex-col py-5 rounded-2xl shadow-2xl  bg-stone-900 min-h-1/4" onClick={(e) => e.stopPropagation()}>
         {children}
       </div>
     </div>
   )
 }
 
-export function NewElementPopup({addElementFunction, parentID, closeFunction}) {
+export function NewElementPopup({addNewElement, parentID, closeFunction}) {
+  const [search, setSearch] = useState("");
+  const options = [
+    {name: "Basic Blocks", elements: [
+        {name: "Paragraph", default: {element: "p", text: "Click to edit"}},
+        {name: "Title", default: {element: "title", size: "h1", text: "Click to edit"}},
+        {name: "Divider", default: {element: "divider"}},
+        {name: "Code", default: {element: "code", text: "public void main"}},
+        {name: "Expandable", default: {element: "expand", title: "Click to edit", content: []}},
+      ]}
+  ]
   return (
     <BasePopup closeFunction={closeFunction}>
-      <p>Add a new element</p>
-      <div className="h-90 my-2 py-2 px-4 flex flex-col gap-2 bg-stone-800 w-2/3 rounded-2xl overflow-y-scroll ">
+      <div className="h-90 my-2 py-2 px-4 flex flex-col gap-2 rounded-2xl overflow-y-scroll ">
+        <input type="text" onChange={(e) => setSearch(e.target.value)} placeholder="Search" className="appearance-none outline-none bg-stone-700 p-1 px-2 rounded-lg"/>
         {/* BASIC ELEMENTS */}
-        <p className="text-sm border-b border-b-stone-600 text-center">Basic Elements</p>
-        <StoneButton title="Title"/>
-        <StoneButton title="Paragraph" onClick={() => addElementFunction(parentID, "p")}/>
-        <div className="flex w-full gap-2">
-          <StoneButton title="Divider" onClick={() => addElementFunction(parentID, "divider")}/>
-          <StoneButton title="Brake" onClick={() => addElementFunction(parentID, "brake")}/>
-        </div>
-        {/* Advanced ELEMENTS */}
-        <p className="text-sm border-b border-b-stone-600 text-center">Advanced Elements</p>
-        <StoneButton title="Code" onClick={() => addElementFunction(parentID, "code")}/>
-        <StoneButton title="Expandable"/>
-        <StoneButton title="Table"/>
-        <StoneButton title="Tabs"/>
-        <StoneButton title="Math"/>
-        {/* OTHER ELEMENTS */}
+        {options.map(block => (
+          <div className="flex flex-col gap-1" key={block.name}>
+            <p className="text-sm border-b border-b-stone-600 text-center">{block.name}</p>
+            {block.elements.map (el =>
+              (search !== "" && !el.name.toLowerCase().includes(search.toLowerCase())) ?
+                null : <GrayButton key={el.name} title={el.name} onClick={() => {
+                  addNewElement(parentID, el.default);
+                  closeFunction();
+                }}/>
+            )}
+          </div>
+        ))}
       </div>
       <div className="w-1/2 flex flex-col">
         <GrayButton title="Close" onClick={closeFunction}/>
@@ -39,10 +48,27 @@ export function NewElementPopup({addElementFunction, parentID, closeFunction}) {
   )
 }
 
-export function EditElementPopup({setClose}) {
-
+export function EditElementPopup({closeFunction, children}) {
+  return (
+    <BasePopup closeFunction={closeFunction}>
+      <div className="my-2 py-2 items-center min-w-70 px-4 flex flex-col gap-2">
+        {children}
+      </div>
+      <div className="w-1/2 flex flex-col">
+        <GrayButton title="Close" onClick={closeFunction}/>
+      </div>
+    </BasePopup>
+  )
 }
 
-export function DeleteElementPopup({setClose}) {
-
+export function DeleteElementPopup({closeFunction, removeFunction, name}) {
+  return (
+    <BasePopup closeFunction={closeFunction}>
+      <p>Are use sure if you </p>
+      <div className="w-1/2 flex flex-col">
+        <GrayButton title="Close" onClick={closeFunction}/>
+        <BlackButton title="Delete" onClick={removeFunction}/>
+      </div>
+    </BasePopup>
+  )
 }

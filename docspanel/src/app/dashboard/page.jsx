@@ -5,6 +5,7 @@ import {DashboardIcon, DefaultUserIcon, TempLogo} from "@/app/icons";
 import {useState} from "react";
 import { Icon } from '@iconify-icon/react';
 import {NewElementPopup} from "@/app/dashboard/EditorHelper";
+import {GrayButton} from "@/app/FlareUI/Basic/Buttons";
 
 const page_json = {
   meta: {
@@ -37,10 +38,9 @@ export default function Page() {
     }))
   }
 
-  const addNewElement = (parentId, type) => {
-
+  const addNewElement = (parentId, newElement) => {
     const element = {
-      element: type,
+      ...newElement,
       id: Date.now()
     }
     setPage(prev => ({
@@ -48,18 +48,33 @@ export default function Page() {
       elements: addRecursive(prev.elements, parentId, element)
     }))
   }
+
+  const updateElement = (id, updates) => {
+    setPage(prev => ({
+      ...prev,
+      elements: updateRecursive(prev.elements, id, updates)
+    }))
+  }
+
   return (
     <main className="h-screen w-screen grid grid-cols-7 bg-stone-800">
-      {newElement ? <NewElementPopup addElementFunction={addElementFunction} closeFunction={() => setNewElement(false)}/> : null}
+      {newElement ? <NewElementPopup parentID="root" addNewElement={addNewElement} closeFunction={() => setNewElement(false)}/> : null}
       <SideBar/>
-      <section className="h-full bg-stone-800 col-span-6">
+      <section className="h-full overflow-auto bg-stone-800 col-span-6">
         <TopBar meta={page.meta}/>
-        <div className="px-10 py-2 overflow-auto max-h-[90%]">
+        <div onClick={() => alert(JSON.stringify(page.elements))}>
+          check source
+        </div>
+        <div className="px-14 py-2">
           {page.elements.map(e =>
-            <EditorRenderer key={e.id} addNewElement={addNewElement} {...e}/>
+            <EditorRenderer key={e.id} functions={{
+              addNewElement: addNewElement,
+              removeElement: removeElement,
+              updateElement: updateElement
+            }} {...e}/>
           )}
-          <div onClick={() => setNewElement(true)} className={`p-2 mt-5 cursor-pointer select-none flex items-center gap-2 bg-stone-800 text-stone-300 border-t border-stone-600 ring ring-stone-950 drop-shadow-2xl rounded-xl`}>
-            <p className="font-medium text-md">+ New Element</p>
+          <div className="mt-2">
+            <GrayButton title="+ Add new element" onClick={() => setNewElement(true)}/>
           </div>
         </div>
       </section>
@@ -126,6 +141,12 @@ const removeRecursive = (elements, id) => {
 }
 
 const addRecursive = (elements, parentId, newElement) => {
+  if (parentId === "root") {
+    return [
+      ...elements,
+      newElement
+    ]
+  }
   return elements.map(el => {
     if (el.id === parentId) {
       return {
@@ -138,6 +159,23 @@ const addRecursive = (elements, parentId, newElement) => {
       return {
         ...el,
         content: addRecursive(el.content, parentId, newElement)
+      }
+    }
+
+    return el
+  })
+}
+
+const updateRecursive = (elements, parentId, updates) => {
+  return elements.map(el => {
+    if (el.id === parentId) {
+      return { ...el, ...updates }
+    }
+
+    if (el.content) {
+      return {
+        ...el,
+        content: addRecursive(el.content, parentId, updates)
       }
     }
 

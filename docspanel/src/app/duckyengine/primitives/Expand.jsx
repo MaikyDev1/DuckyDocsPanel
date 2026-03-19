@@ -28,16 +28,17 @@ export function Expand({id, title, content}) {
   )
 }
 
-export function InEditor({id, title, content, addNewElement}) {
+export function InEditor({id, title, content, functions}) {
   const [newElement, setNewElement] = useState(false);
   return (
     <div>
-      {newElement ? <NewElementPopup addElementFunction={addNewElement} parentID={id} closeFunction={() => setNewElement(false)}/> : null}
+      {newElement ? <NewElementPopup addNewElement={functions.addNewElement} parentID={id} closeFunction={() => setNewElement(false)}/> : null}
       <div className="flex gap-2 relative">
-        <DeleteIcon className="absolute -translate-x-11"/>
-        <EditIcon className="absolute -translate-x-6"/>
-        <Helper id={id} title={title}>
-          {content.map(e => <EditorRenderer key={e.id} {...e} addNewElement={addNewElement}/>)}
+        <div className="absolute cursor-pointer flex items-center h-full justify-center text-lg -translate-x-12">
+          <DeleteIcon className="" onClick={() => functions.removeElement(id)}/>
+        </div>
+        <Helper id={id} title={<div onClick={(e) => e.stopPropagation()}><EditableText id={id} text={title} updateFunction={functions.updateElement}/></div>}>
+          {content.map(e => <EditorRenderer key={e.id} {...e} functions={functions}/>)}
           <div className="mt-2">
             <GrayButton title="+ Add new element" onClick={() => setNewElement(true)}/>
           </div>
@@ -50,7 +51,6 @@ export function InEditor({id, title, content, addNewElement}) {
 const paragraphModule = {
   element: Expand,
   element_name: ["expand"],
-  default_config: {element: "expand", title: "", content: []},
   in_editor: InEditor
 }
 

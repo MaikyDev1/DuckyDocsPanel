@@ -13,10 +13,11 @@ import {
   UnderlineIcon
 } from "@/app/icons";
 
-export function EditableText({id, text}) {
+export function EditableText({id, updateFunction, text}) {
   const editorRef = useRef(null);
   function focusEditor() {
     editorRef.current?.focus()
+    if (updateFunction) updateFunction(id, {text: editorRef.current.innerHTML})
   }
 
   function run(command, value) {
